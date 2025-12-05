@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:project_akhir/pages/auth_page.dart';
 import 'package:project_akhir/pages/toolkit_page.dart';
 import 'package:project_akhir/services/auth_service.dart';
-import 'package:project_akhir/services/saran_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilPage extends StatefulWidget {
@@ -23,10 +22,8 @@ class _ProfilPageState extends State<ProfilPage> {
 
   // --- State ---
   final AuthService _authService = AuthService();
-  final SaranService _saranService = SaranService();
   String _username = "Memuat...";
   String _email = "Memuat...";
-  final TextEditingController _saranController = TextEditingController();
 
   @override
   void initState() {
@@ -44,22 +41,6 @@ class _ProfilPageState extends State<ProfilPage> {
     }
   }
 
-  Future<void> _kirimSaran() async {
-    final saran = _saranController.text;
-    if (saran.isEmpty) {
-      _showSnackBar('Saran tidak boleh kosong.', isError: true);
-      return;
-    }
-    FocusScope.of(context).unfocus();
-    try {
-      await _saranService.simpanSaran(saran);
-      _saranController.clear();
-      _showSnackBar('Saran Anda telah terkirim. Terima kasih!', isError: false);
-    } catch (e) {
-      _showSnackBar('Gagal mengirim saran.', isError: true);
-    }
-  }
-
   Future<void> _logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isLoggedIn', false);
@@ -67,16 +48,6 @@ class _ProfilPageState extends State<ProfilPage> {
     if (!context.mounted) return;
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) => const AuthPage()),
-    );
-  }
-
-  void _showSnackBar(String message, {bool isError = false}) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isError ? Colors.red : Colors.green,
-      ),
     );
   }
 
@@ -115,8 +86,7 @@ class _ProfilPageState extends State<ProfilPage> {
               _email,
               style: const TextStyle(color: darkGrey),
             ),
-            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-            onTap: () {},
+            trailing: const Icon(Icons.verified, size: 20, color: primaryGreen),
           ),
           
           // --- 2. Grup Toolkit ---
@@ -133,37 +103,44 @@ class _ProfilPageState extends State<ProfilPage> {
             },
           ),
           
-          
-          // --- 3. Grup Saran & Kesan ---
-          _buildGroupHeader('Masukan'),
+          // --- 3. Grup Kesan & Pesan (STATIS) ---
+          _buildGroupHeader('Kesan & Pesan Developer'),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            child: TextField(
-              controller: _saranController,
-              maxLines: 4,
-              decoration: InputDecoration(
-                hintText: 'Tulis masukan Anda untuk aplikasi ini...',
-                filled: true,
-                fillColor: lightGrey,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.0),
-                  borderSide: BorderSide.none,
-                ),
+            child: Container(
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: lightGrey,
+                borderRadius: BorderRadius.circular(16.0),
+                border: Border.all(color: Colors.grey.shade200),
               ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: ElevatedButton(
-              onPressed: _kirimSaran,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: primaryGreen,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text(
+                    "Kesan:",
+                    style: TextStyle(fontWeight: FontWeight.bold, color: primaryBlack, fontSize: 14),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    "Pengembangan aplikasi ini memberikan wawasan mendalam tentang integrasi API dan manajemen state di Flutter.",
+                    style: TextStyle(color: darkGrey, fontSize: 13, height: 1.5),
+                    textAlign: TextAlign.justify,
+                  ),
+                  Divider(height: 24),
+                  Text(
+                    "Pesan:",
+                    style: TextStyle(fontWeight: FontWeight.bold, color: primaryBlack, fontSize: 14),
+                  ),
+                  SizedBox(height: 4),
+                  // [TEKS YANG ANDA MINTA]
+                  Text(
+                    "Semoga aplikasi ini membantu anda dan terimakasih pak bagus sudah membimbing saya.",
+                    style: TextStyle(color: darkGrey, fontSize: 13, height: 1.5),
+                    textAlign: TextAlign.justify,
+                  ),
+                ],
               ),
-              child: const Text('Kirim Saran'),
             ),
           ),
           
@@ -195,7 +172,6 @@ class _ProfilPageState extends State<ProfilPage> {
     );
   }
 
-  // Helper untuk judul grup
   Widget _buildGroupHeader(String title) {
     return Padding(
       padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 24.0, bottom: 8.0),
@@ -210,6 +186,4 @@ class _ProfilPageState extends State<ProfilPage> {
       ),
     );
   }
-
- 
 }
